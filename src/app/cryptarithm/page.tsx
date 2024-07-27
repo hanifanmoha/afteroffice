@@ -2,6 +2,7 @@ import cx from 'classnames'
 
 interface IDigitProps {
   char: string
+  isActive?: boolean
   status?: 'valid' | 'invalid' | 'normal'
   value?: string
 }
@@ -10,7 +11,7 @@ interface IButtonInput {
   char: string
 }
 
-function Digit({ char, status = 'normal', value }: IDigitProps) {
+function Digit({ char, status = 'normal', value, isActive }: IDigitProps) {
   return (
     <div
       className={cx('m-2 bg-slate-600 rounded-lg p-1', {
@@ -19,9 +20,12 @@ function Digit({ char, status = 'normal', value }: IDigitProps) {
       })}
     >
       <div
-        className={
-          'w-20 h-20 rounded-lg border-gray-700 bg-slate-900 text-4xl font-bold flex justify-center items-center'
-        }
+        className={cx(
+          'w-14 h-14 rounded-lg border-gray-700 bg-slate-900 text-3xl font-bold flex justify-center items-center',
+          {
+            'bg-slate-700': isActive,
+          }
+        )}
       >
         {value}
       </div>
@@ -32,31 +36,31 @@ function Digit({ char, status = 'normal', value }: IDigitProps) {
 
 function ButtonInput({ char }: IButtonInput) {
   return (
-    <div className='bg-gray-500 rounded-lg w-24 h-12 flex justify-center items-center mx-1 my-2 text-2xl hover:bg-gray-700 cursor-pointer font-semibold'>
+    <button className='bg-gray-500 rounded-lg w-24 h-12 flex justify-center items-center mx-1 my-2 text-2xl hover:bg-gray-700 cursor-pointer font-semibold'>
       {char}
-    </div>
+    </button>
   )
 }
 
 export default function Home() {
   return (
-    <main className='flex min-h-screen w-full max-w-xl flex-col items-center justify-between m-auto text-white'>
+    <main className='flex min-h-screen w-full max-w-xl flex-col items-center justify-between m-auto text-white pb-12'>
       {/* Board */}
       <div className='pt-8'>
-        <div className='flex flex-row justify-end mb-4 px-8'>
+        <div className='flex flex-row justify-end mb-1 px-8'>
           <Digit char='A' status='invalid' value='1' />
-          <Digit char='D' status='valid' value='2' />
+          <Digit char='D' status='valid' value='2' isActive />
           <Digit char='A' value='3' />
         </div>
-        <div className='flex flex-row justify-end mb-4 px-8'>
+        <div className='flex flex-row justify-end mb-1 px-8'>
           <Digit char='D' />
           <Digit char='I' />
         </div>
         <div className='flex flex-col items-end'>
           <p className='text-xl'>+</p>
-          <hr className='min-w-full border-2 mb-4' />
+          <hr className='min-w-full border-2 mb-3' />
         </div>
-        <div className='flex flex-row justify-end mb-4 px-8'>
+        <div className='flex flex-row justify-end mb-1 px-8'>
           <Digit char='D' />
           <Digit char='I' />
           <Digit char='A' />
