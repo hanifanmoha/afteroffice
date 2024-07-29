@@ -1,7 +1,9 @@
 'use client'
 
 import cx from 'classnames'
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
+
+type IDigitInputText = '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9'
 
 interface IDigitProps {
   char: string
@@ -78,12 +80,12 @@ export default function Home() {
     [problem, activeIndex]
   )
 
-  function handleSelectDigit(rowIndex: number, colIndex: number) {
+  const handleSelectDigit = (rowIndex: number, colIndex: number) => {
     const idx = rc2Idx(problem, rowIndex, colIndex)
     setActiveIndex(idx)
   }
 
-  function handleInput(val: string) {
+  const handleInput = (val: string) => {
     const [r, c] = idx2RC(problem, activeIndex)
     if (r < 0 || c < 0) return
 
@@ -114,6 +116,28 @@ export default function Home() {
       }
     }
   }
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      console.log('Key pressed:', event.key)
+      if ('0123456789'.includes(event.key)) {
+        handleInput(event.key)
+      }
+      if (event.key === 'Backspace') {
+        handleInput('X')
+      }
+    }
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('keydown', handleKeyDown)
+    }
+
+    return () => {
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('keydown', handleKeyDown)
+      }
+    }
+  }, [handleInput])
 
   return (
     <main className='flex min-h-screen w-full max-w-xl flex-col items-center justify-between m-auto text-white pb-8'>
