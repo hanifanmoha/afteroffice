@@ -119,10 +119,6 @@ export default function Home() {
     const digit2 = values[1].join('')
     const sum = parseInt(digit1) + parseInt(digit2)
     const sumArr = (sum + '').split('')
-    console.log(
-      sumArr,
-      values[2].map((v, idx) => v === sumArr[idx])
-    )
     return values[2].map((v, idx) => v === sumArr[idx])
   }, [values, isAllFilled])
 
@@ -193,7 +189,6 @@ export default function Home() {
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      console.log('Key pressed:', event.key)
       if ('0123456789'.includes(event.key)) {
         handleInput(event.key)
       }
@@ -232,8 +227,6 @@ export default function Home() {
     },
     [values, isCharValid, isSolved]
   )
-
-  console.log(digitStatus(0, 0))
 
   return (
     <main className='flex min-h-screen w-full max-w-xl flex-col items-center justify-between m-auto text-white pb-8'>
