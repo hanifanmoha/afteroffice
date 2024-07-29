@@ -1,7 +1,7 @@
 'use client'
 
 import cx from 'classnames'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 
 type IDigitInputText = '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9'
 
@@ -28,7 +28,8 @@ function Digit({
   return (
     <div
       onClick={onSelect}
-      className={cx('m-2 bg-slate-600 rounded-lg p-1', {
+      className={cx('m-2  rounded-lg p-1', {
+        'bg-slate-600': status === 'normal',
         'bg-yellow-600': status === 'invalid',
         'bg-green-700': status === 'valid',
       })}
@@ -72,6 +73,76 @@ export default function Home() {
 
   const [activeIndex, setActiveIndex] = useState(0)
 
+  const isAllFilled = useMemo<boolean>(() => {
+    for (let row of values) {
+      for (let v of row) {
+        if (!v) {
+          return false
+        }
+      }
+    }
+    return true
+  }, [values])
+
+  const isCharValid = useMemo<boolean[][]>(() => {
+    const vals: { [key: string]: string[] } = {}
+
+    for (let r = 0; r < values.length; r++) {
+      for (let c = 0; c < values[r].length; c++) {
+        if (!values[r][c]) continue
+        const p = problem[r][c]
+        const v = values[r][c]
+        if (!vals[p]) {
+          vals[p] = [v]
+        } else if (!vals[p].includes(v)) {
+          vals[p].push(v)
+        }
+      }
+    }
+
+    return problem.map((row, rowIndex) => {
+      return row.map((col, colIndex) => {
+        const p = problem[rowIndex][colIndex]
+        const v = values[rowIndex][colIndex]
+        if (!v) return true
+        if (!vals[p]) return true
+        return vals[p].length === 1
+      })
+    })
+  }, [values, problem])
+
+  const isSumValid = useMemo<boolean[]>(() => {
+    if (!isAllFilled) {
+      return values[2].map((v) => true)
+    }
+    const digit1 = values[0].join('')
+    const digit2 = values[1].join('')
+    const sum = parseInt(digit1) + parseInt(digit2)
+    const sumArr = (sum + '').split('')
+    console.log(
+      sumArr,
+      values[2].map((v, idx) => v === sumArr[idx])
+    )
+    return values[2].map((v, idx) => v === sumArr[idx])
+  }, [values, isAllFilled])
+
+  const isSolved = useMemo<boolean>(() => {
+    if (!isAllFilled) {
+      return false
+    }
+    for (let r = 0; r < values.length; r++) {
+      for (let c = 0; c < values[r].length; c++) {
+        if (!isCharValid[r][c]) {
+          return false
+        }
+        if (r === 2 && !isSumValid[c]) {
+          return false
+        }
+      }
+    }
+    return true
+  }, [isAllFilled, isCharValid, isSumValid])
+
   const isActive = useCallback(
     (rowIndex: number, colIndex: number): boolean => {
       const idx = rc2Idx(problem, rowIndex, colIndex)
@@ -86,6 +157,9 @@ export default function Home() {
   }
 
   const handleInput = (val: string) => {
+    if (isSolved) {
+      return
+    }
     const [r, c] = idx2RC(problem, activeIndex)
     if (r < 0 || c < 0) return
 
@@ -139,6 +213,28 @@ export default function Home() {
     }
   }, [handleInput])
 
+  const digitStatus = useCallback(
+    (
+      rowIndex: number,
+      colIndex: number,
+      validateSum: boolean = false
+    ): 'valid' | 'invalid' | 'normal' => {
+      if (isSolved) {
+        return 'valid'
+      }
+      if (!isCharValid[rowIndex][colIndex]) {
+        return 'invalid'
+      }
+      if (validateSum && !isSumValid[colIndex]) {
+        return 'invalid'
+      }
+      return 'normal'
+    },
+    [values, isCharValid, isSolved]
+  )
+
+  console.log(digitStatus(0, 0))
+
   return (
     <main className='flex min-h-screen w-full max-w-xl flex-col items-center justify-between m-auto text-white pb-8'>
       {/* Board */}
@@ -152,6 +248,7 @@ export default function Home() {
                 value={values[0][i]}
                 isActive={isActive(0, i)}
                 onSelect={() => handleSelectDigit(0, i)}
+                status={digitStatus(0, i)}
               />
             ))}
         </div>
@@ -164,6 +261,7 @@ export default function Home() {
                 value={values[1][i]}
                 isActive={isActive(1, i)}
                 onSelect={() => handleSelectDigit(1, i)}
+                status={digitStatus(1, i)}
               />
             ))}
         </div>
@@ -180,6 +278,7 @@ export default function Home() {
                 value={values[2][i]}
                 isActive={isActive(2, i)}
                 onSelect={() => handleSelectDigit(2, i)}
+                status={digitStatus(2, i, true)}
               />
             ))}
         </div>
