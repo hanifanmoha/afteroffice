@@ -60,16 +60,28 @@ function ButtonInput({ char, onSelect }: IButtonInput) {
   )
 }
 
+const fetchProblem = async (): Promise<string> => {
+  try {
+    const res = await fetch('/api/cryptarithm')
+    const json = await res.json()
+    const problem = json.problem
+    return problem
+  } catch (err) {
+    return 'ADA_DI_DIA'
+  }
+}
+
 export default function Home() {
-  const problemString = 'ADA_DI_DIA'
-
-  const [problem] = useState<string[][]>(
-    problemString.split('_').map((s) => s.split(''))
-  )
-
-  const [values, setValues] = useState<string[][]>(
-    problemString.split('_').map((s) => s.split('').map((c) => ''))
-  )
+  const [problem, setProblem] = useState<string[][]>([
+    ['', '', ''],
+    ['', '', ''],
+    ['', '', ''],
+  ])
+  const [values, setValues] = useState<string[][]>([
+    ['', '', ''],
+    ['', '', ''],
+    ['', '', ''],
+  ])
 
   const [activeIndex, setActiveIndex] = useState(0)
 
@@ -227,6 +239,15 @@ export default function Home() {
     },
     [values, isCharValid, isSolved]
   )
+
+  useEffect(() => {
+    ;(async function () {
+      const str = await fetchProblem()
+      setProblem(str.split('_').map((s) => s.split('')))
+      setValues(str.split('_').map((s) => s.split('').map((c) => '')))
+      console.log(str)
+    })()
+  }, [])
 
   return (
     <main className='flex min-h-screen w-full max-w-xl flex-col items-center justify-between m-auto text-white pb-8'>
